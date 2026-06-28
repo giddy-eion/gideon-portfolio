@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Igbudu Gideon — Data Annotator & QA Tester</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #1a1d24;
+    --border: #22262f;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --accent-glow: rgba(0, 229, 255, 0.15);
+    --text: #e8eaf0;
+    --muted: #7a8090;
+    --white: #ffffff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2.5rem;
+    background: rgba(10,12,16,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent); letter-spacing: 0.05em; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 6rem 2.5rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(124,58,237,0.1) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 30%, rgba(0,229,255,0.06) 0%, transparent 60%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+    opacity: 0.35;
+  }
+  .hero-content { position: relative; max-width: 860px; animation: fadeUp 0.6s ease both; }
+
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; color: var(--accent);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .hero-eyebrow::before { content: ''; display: inline-block; width: 32px; height: 1px; background: var(--accent); }
+
+  .hero-name { font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 700; line-height: 1.0; letter-spacing: -0.02em; color: var(--white); margin-bottom: 0.5rem; }
+  .hero-name span { color: var(--accent); }
+
+  .hero-roles {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    color: var(--muted); margin-bottom: 1.75rem;
+    display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center;
+  }
+  .role-divider { color: var(--border); }
+
+  .hero-summary { font-size: 1.05rem; color: var(--text); max-width: 620px; line-height: 1.8; margin-bottom: 2.5rem; opacity: 0.85; }
+
+  .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 600;
+    letter-spacing: 0.02em; border-radius: 6px; cursor: pointer;
+    text-decoration: none; transition: all 0.2s; border: none;
+  }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: #33ecff; box-shadow: 0 0 24px rgba(0,229,255,0.4); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-1px); }
+
+  /* STAT BAR */
+  .stat-bar {
+    background: var(--surface);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2.5rem;
+    display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.75rem; font-weight: 700; color: var(--accent); display: block; }
+  .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* SECTIONS */
+  section { padding: 5rem 2.5rem; max-width: 1100px; margin: 0 auto; }
+  .section-header { margin-bottom: 3rem; }
+  .section-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.5rem; }
+  .section-title { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; color: var(--white); letter-spacing: -0.02em; }
+  .section-sub { font-size: 0.95rem; color: var(--muted); margin-top: 0.5rem; max-width: 560px; line-height: 1.7; }
+
+  /* SKILLS GRID */
+  .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .skill-card { background: var(--surface); padding: 1.75rem; transition: background 0.2s; }
+  .skill-card:hover { background: var(--surface2); }
+  .skill-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .skill-title { font-size: 0.9rem; font-weight: 700; color: var(--white); margin-bottom: 0.5rem; }
+  .skill-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
+
+  /* EXPERIENCE */
+  .experience-list { display: flex; flex-direction: column; gap: 1.5rem; }
+  .exp-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 2rem;
+    position: relative; overflow: hidden; transition: border-color 0.2s;
+  }
+  .exp-card:hover { border-color: rgba(0,229,255,0.3); }
+  .exp-card::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--accent), var(--accent2)); }
+  .exp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem; }
+  .exp-role { font-size: 1.05rem; font-weight: 700; color: var(--white); }
+  .exp-date { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); background: var(--accent-glow); padding: 0.2rem 0.6rem; border-radius: 4px; border: 1px solid rgba(0,229,255,0.2); white-space: nowrap; }
+  .exp-company { font-size: 0.85rem; color: var(--muted); margin-bottom: 1rem; }
+  .exp-bullets { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+  .exp-bullets li { font-size: 0.875rem; color: var(--text); padding-left: 1.25rem; position: relative; opacity: 0.85; line-height: 1.65; }
+  .exp-bullets li::before { content: '›'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  .exp-note { font-size: 0.78rem; color: var(--muted); margin-top: 1rem; padding: 0.65rem 1rem; border-left: 2px solid var(--accent2); background: rgba(124,58,237,0.07); border-radius: 0 6px 6px 0; font-style: italic; line-height: 1.6; }
+
+  /* BADGES */
+  .badge { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; padding: 0.2rem 0.65rem; border-radius: 100px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); margin-right: 0.4rem; margin-bottom: 0.4rem; }
+  .badge.accent { background: var(--accent-glow); border-color: rgba(0,229,255,0.25); color: var(--accent); }
+  .badge.purple { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.3); color: #a78bfa; }
+
+  /* CONTACT */
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+  .contact-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; display: flex; align-items: center; gap: 1rem; text-decoration: none; color: var(--text); transition: all 0.2s; }
+  .contact-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .contact-icon { font-size: 1.4rem; }
+  .contact-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.15rem; }
+  .contact-value { font-size: 0.9rem; font-weight: 500; color: var(--white); }
+
+  /* WRAPPERS */
+  .alt-wrap { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+
+  /* ANNOTATION TYPES */
+  .annotation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
+  .ann-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; transition: all 0.2s; }
+  .ann-card:hover { border-color: rgba(0,229,255,0.3); transform: translateY(-2px); }
+  .ann-type { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem; }
+  .ann-title { font-size: 0.9rem; font-weight: 600; color: var(--white); margin-bottom: 0.35rem; }
+  .ann-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+
+  /* FOOTER */
+  footer { border-top: 1px solid var(--border); padding: 2rem 2.5rem; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 640px) {
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { gap: 1rem; }
+    section { padding: 3.5rem 1.25rem; }
+    .stat-bar { gap: 1.5rem; padding: 1.5rem 1.25rem; }
+    .hero { padding: 5rem 1.25rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">GIDEON.IO</div>
+  <ul class="nav-links">
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#annotation">Annotation</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Available for Remote Work · Immediate Start</div>
+    <h1 class="hero-name">Igbudu <span>Gideon</span></h1>
+    <div class="hero-roles">
+      <span>Data Annotator</span>
+      <span class="role-divider">/</span>
+      <span>QA Tester</span>
+      <span class="role-divider">/</span>
+      <span>Video Annotator</span>
+    </div>
+    <p class="hero-summary">
+      Detail-oriented annotation and QA professional with 3+ years of structured, guideline-driven remote work. Certified on Test.io with a strong track record of precise, reproducible output. Additional grounding in video and gameplay content — giving me a sharp visual eye for frame-level accuracy, motion consistency, and on-screen event labeling.
+    </p>
+    <div class="hero-cta">
+      <a href="mailto:gideonosamudiame@gmail.com" class="btn btn-primary">📧 Get in touch</a>
+      <a href="#experience" class="btn btn-ghost">View Experience →</a>
+    </div>
+  </div>
+</div>
+
+<!-- STAT BAR -->
+<div class="stat-bar">
+  <div class="stat-item">
+    <span class="stat-value">3+</span>
+    <span class="stat-label">Years QA & Annotation</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-value">100%</span>
+    <span class="stat-label">Remote Track Record</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-value">Cert.</span>
+    <span class="stat-label">Test.io Certified</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-value">Fast</span>
+    <span class="stat-label">Immediate Availability</span>
+  </div>
+</div>
+
+<!-- CORE SKILLS -->
+<section id="skills">
+  <div class="section-header">
+    <div class="section-label">// core competencies</div>
+    <h2 class="section-title">What I bring to annotation</h2>
+    <p class="section-sub">Built through years of certified QA work — the same discipline, accuracy, and structured thinking that makes a strong annotator.</p>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-card">
+      <div class="skill-icon">🎯</div>
+      <div class="skill-title">Guideline Adherence</div>
+      <div class="skill-desc">Trained to follow detailed, multi-step instructions precisely and consistently — a non-negotiable in both QA testing and data annotation workflows.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">🔍</div>
+      <div class="skill-title">Attention to Detail</div>
+      <div class="skill-desc">A QA-trained eye for spotting inconsistencies, edge cases, and deviations — directly transferable to labeling accuracy and quality benchmarking in annotation tasks.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">📋</div>
+      <div class="skill-title">Structured Reporting</div>
+      <div class="skill-desc">Expert at step-by-step, reproducible documentation. Every defect, flag, or annotation decision is recorded with clarity, traceability, and context.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">🖥️</div>
+      <div class="skill-title">Remote Work Discipline</div>
+      <div class="skill-desc">3+ years delivering consistent output in distributed, asynchronous environments. Reliable setup: personal Windows PC, stable internet, and familiarity with browser-based tooling.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">🎬</div>
+      <div class="skill-title">Visual & Video Judgment</div>
+      <div class="skill-desc">Hands-on experience recording, reviewing, and editing gameplay footage sharpens frame-level observation — a practical edge for video annotation and event-labeling tasks.</div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-icon">⚙️</div>
+      <div class="skill-title">Tool Familiarity</div>
+      <div class="skill-desc">Comfortable with Chrome DevTools, Vercel-deployed platforms, bug-tracking tools, and browser-based workflows — quick to adapt to annotation platforms and interfaces.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ANNOTATION TYPES -->
+<div class="alt-wrap">
+  <section id="annotation">
+    <div class="section-header">
+      <div class="section-label">// annotation readiness</div>
+      <h2 class="section-title">Annotation types I can handle</h2>
+      <p class="section-sub">My QA background maps directly onto these annotation disciplines — same core skills, different application.</p>
+    </div>
+    <div class="annotation-grid">
+      <div class="ann-card">
+        <div class="ann-type">Video</div>
+        <div class="ann-title">Video & Gameplay Annotation</div>
+        <div class="ann-desc">Frame-level event labeling, action recognition, and temporal segmentation — backed by real gameplay recording and review experience.</div>
+      </div>
+      <div class="ann-card">
+        <div class="ann-type">Image</div>
+        <div class="ann-title">Image Labeling & Tagging</div>
+        <div class="ann-desc">Object identification, bounding boxes, and classification tasks — applying the same visual precision used in UI/UX defect detection.</div>
+      </div>
+      <div class="ann-card">
+        <div class="ann-type">Text</div>
+        <div class="ann-title">Text & Data Annotation</div>
+        <div class="ann-desc">Structured tagging, entity recognition, and sentiment classification — drawn from experience with precise, rule-based documentation in QA workflows.</div>
+      </div>
+      <div class="ann-card">
+        <div class="ann-type">QA</div>
+        <div class="ann-title">Annotation Quality Review</div>
+        <div class="ann-desc">Reviewing and validating annotated outputs for consistency and accuracy — exactly what QA testing is, applied to labeled datasets.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-header">
+    <div class="section-label">// work history</div>
+    <h2 class="section-title">Experience</h2>
+  </div>
+  <div class="experience-list">
+
+    <div class="exp-card">
+      <div class="exp-header">
+        <div class="exp-role">QA Tester — Certified</div>
+        <div class="exp-date">2023 – Present</div>
+      </div>
+      <div class="exp-company">Test.io · Remote</div>
+      <ul class="exp-bullets">
+        <li>Execute structured test cycles for global software products following detailed test plans — the same workflow discipline required in annotation sessions</li>
+        <li>Deliver precise, reproducible bug reports with step-by-step documentation, reflecting annotation-level accuracy and traceability</li>
+        <li>Maintain certified tester status, demonstrating consistent quality and adherence to platform standards across varied products</li>
+        <li>Validate UI consistency across device types and screen sizes; collaborate with distributed remote teams to meet deadlines</li>
+      </ul>
+      <div style="margin-top:1rem;">
+        <span class="badge accent">Certified</span>
+        <span class="badge">Remote</span>
+        <span class="badge">Structured Reporting</span>
+        <span class="badge">Guideline-Driven</span>
+        <span class="badge">Multi-Device</span>
+      </div>
+    </div>
+
+    <div class="exp-card">
+      <div class="exp-header">
+        <div class="exp-role">Freelance QA Tester</div>
+        <div class="exp-date">2024</div>
+      </div>
+      <div class="exp-company">Glory Umuerri (Independent Web Developer) · FUPRE Sports Media Platform</div>
+      <ul class="exp-bullets">
+        <li>Conducted end-to-end testing of a full-stack web application independently and without supervision — demonstrating self-directed remote work capacity</li>
+        <li>Identified and documented UI/UX defects with methodical precision, improving platform consistency across browsers</li>
+        <li>Validated functional workflows, navigation flows, and cross-browser compatibility — skills directly applicable to annotation quality checks</li>
+        <li>Provided structured QA feedback throughout the development lifecycle, contributing to iterative improvements</li>
+      </ul>
+      <div style="margin-top:1rem;">
+        <span class="badge">End-to-End Testing</span>
+        <span class="badge">Cross-Browser</span>
+        <span class="badge">Independent</span>
+        <span class="badge">UI/UX Validation</span>
+      </div>
+    </div>
+
+    <div class="exp-card">
+      <div class="exp-header">
+        <div class="exp-role">Gaming Content Creator</div>
+        <div class="exp-date">2024 – Present</div>
+      </div>
+      <div class="exp-company">TikTok — @giddy_eion · Self-directed</div>
+      <ul class="exp-bullets">
+        <li>Independently record, review, and edit gameplay footage across multiple titles — developing a practical eye for frame-level visual accuracy and on-screen event recognition</li>
+        <li>Live-streamed gameplay sessions with real-time monitoring of frame rate, broadcast stability, and performance — directly relevant to video annotation and quality checking</li>
+        <li>Experience uploading and managing large video files across sessions, with familiarity in screen capture tools and recording configurations</li>
+      </ul>
+      <div class="exp-note">
+        This role is listed as supporting context — the visual review and video handling experience here directly strengthens my readiness for video and gameplay annotation tasks.
+      </div>
+      <div style="margin-top:1rem;">
+        <span class="badge purple">Video Review</span>
+        <span class="badge purple">Screen Capture</span>
+        <span class="badge purple">Frame-Level Observation</span>
+        <span class="badge purple">Live Streaming</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- EDUCATION & CERTS -->
+<div class="alt-wrap">
+  <section>
+    <div class="section-header">
+      <div class="section-label">// background</div>
+      <h2 class="section-title">Education & Certification</h2>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:1rem;">
+      <div class="exp-card">
+        <div class="exp-header">
+          <div class="exp-role">B.Eng. Electrical & Electronics Engineering</div>
+          <div class="exp-date">2022 – Present</div>
+        </div>
+        <div class="exp-company">Federal University of Petroleum Resources (FUPRE), Effurun · 400 Level, In Progress</div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-header">
+          <div class="exp-role">Certified QA Tester</div>
+          <div class="exp-date">Active</div>
+        </div>
+        <div class="exp-company">Test.io Professional Testing Platform</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header">
+    <div class="section-label">// reach out</div>
+    <h2 class="section-title">Let's work together</h2>
+    <p class="section-sub">Open to remote annotation contracts, QA roles, and video labeling projects. Available immediately.</p>
+  </div>
+  <div class="contact-grid">
+    <a href="mailto:gideonosamudiame@gmail.com" class="contact-card">
+      <div class="contact-icon">📧</div>
+      <div>
+        <div class="contact-label">Email</div>
+        <div class="contact-value">gideonosamudiame@gmail.com</div>
+      </div>
+    </a>
+    <a href="tel:+2349168559876" class="contact-card">
+      <div class="contact-icon">📞</div>
+      <div>
+        <div class="contact-label">Phone</div>
+        <div class="contact-value">+234 916 855 9876</div>
+      </div>
+    </a>
+    <div class="contact-card">
+      <div class="contact-icon">📍</div>
+      <div>
+        <div class="contact-label">Location</div>
+        <div class="contact-value">Effurun, Delta State, Nigeria</div>
+      </div>
+    </div>
+    <a href="https://www.tiktok.com/@giddy_eion" target="_blank" class="contact-card">
+      <div class="contact-icon">🎬</div>
+      <div>
+        <div class="contact-label">Video Portfolio</div>
+        <div class="contact-value">TikTok @giddy_eion</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <span style="color:var(--accent);">IGBUDU GIDEON OSAMUDIAME</span> · Data Annotator · QA Tester · Video Annotator · Available Immediately
+</footer>
+
+</body>
+</html>
